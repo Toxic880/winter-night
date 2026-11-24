@@ -1,0 +1,1081 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Winter Night</title>
+<meta name="description" content="A snowy forest at night with a campfire, drawn in text.">
+<style>
+  :root { color-scheme: dark; }
+  html, body { margin: 0; height: 100%; background: #0c0d10; overflow: hidden; }
+  canvas { position: fixed; inset: 0; display: block; width: 100vw; height: 100vh; }
+</style>
+</head>
+<body>
+<canvas id="c" aria-label="A snowy forest at night with a campfire, drawn with text characters"></canvas>
+<script>
+/*
+  winter night
+  url options: bar=0 bold=0 glow=0 moon=0 speed= wind= snow= fire= flies= fps=25 rows=72 seed=7 loop=120
+  keys: H help, [ ] speed, w/W wind, s/S snow, f/F fire, l/L fireflies, G glow, M moon, B status bar
+*/
+const FONT_WOFF2 = "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";
+const FONT_WOFF2_BOLD = "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";
+</script>
+<script>
+(() => {
+'use strict';
+
+// options
+const Q = new URLSearchParams(location.search);
+const qn = (k, d, lo, hi) => { const v = parseFloat(Q.get(k)); return Number.isFinite(v) ? Math.min(hi, Math.max(lo, v)) : d; };
+const qb = (k, d) => (Q.has(k) ? !/^(0|false|off|no)$/i.test(Q.get(k)) : d);
+const S = {
+  speed: qn('speed', 1.0, 0.25, 4),
+  wind: qn('wind', 1.5, -6, 6),
+  snow: qn('snow', 1.6, 0, 4),
+  fire: qn('fire', 1.7, 0.4, 3),
+  flies: qn('flies', 2.4, 0, 6),
+  glow: qb('glow', true),
+  moon: qb('moon', true),
+  bar: qb('bar', true),
+  bold: qb('bold', true),
+  fps: Math.round(qn('fps', 25, 5, 60)),
+  rows: Math.round(qn('rows', 72, 24, 240)),
+  seed: Math.round(qn('seed', 7, 0, 1e9)),
+  loop: qn('loop', 120, 10, 600),
+};
+const CAPTURE = qb('capture', false);
+let showHelp = false;
+
+// helpers
+function rngOf(seed) {
+  let a = (seed >>> 0) || 1;
+  return () => {
+    a = (a + 0x6D2B79F5) >>> 0;
+    let t = a;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+function hash3(x, y, z) {
+  let h = Math.imul(x | 0, 0x27d4eb2d) ^ Math.imul(y | 0, 0x165667b1) ^ Math.imul(z | 0, 0x2545f491);
+  h = Math.imul(h ^ (h >>> 15), 0x85ebca6b);
+  h = Math.imul(h ^ (h >>> 13), 0xc2b2ae35);
+  h ^= h >>> 16;
+  return (h >>> 0) / 4294967296;
+}
+function n1(x, s) {
+  const i = Math.floor(x), f = x - i, u = f * f * (3 - 2 * f);
+  const a = hash3(i, s, 7), b = hash3(i + 1, s, 7);
+  return a + (b - a) * u;
+}
+function n2(x, y, s) {
+  const xi = Math.floor(x), yi = Math.floor(y), fx = x - xi, fy = y - yi;
+  const ux = fx * fx * (3 - 2 * fx), uy = fy * fy * (3 - 2 * fy);
+  const a = hash3(xi, yi, s), b = hash3(xi + 1, yi, s), c = hash3(xi, yi + 1, s), d = hash3(xi + 1, yi + 1, s);
+  return a + (b - a) * ux + (c - a) * uy + (a - b - c + d) * ux * uy;
+}
+const clamp = (v, a, b) => (v < a ? a : v > b ? b : v);
+const lerp = (a, b, t) => a + (b - a) * t;
+const frac = v => v - Math.floor(v);
+const TAU = Math.PI * 2;
+const GI = ch => ch.charCodeAt(0) - 32;
+const hex = h => [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)];
+const sc3 = (c, k) => [c[0] * k, c[1] * k, c[2] * k];
+const mix3 = (a, b, t) => [lerp(a[0], b[0], t), lerp(a[1], b[1], t), lerp(a[2], b[2], t)];
+
+// colours
+const BG = hex('#0c0d10'), BG2 = hex('#110d0b');
+const P = {
+  snowFar: hex('#b7b8b5'), snowNear: hex('#e4e6e2'),
+  treeFar: hex('#4b7f4e'), edgeFar: hex('#6d9d6f'),
+  treeMid: hex('#4f9951'), edgeMid: hex('#76ad76'),
+  treeBig: hex('#3d7743'), edgeBig: hex('#578b5b'),
+  snowTree: hex('#d8d9d5'), snowTreeFar: hex('#b9bab7'),
+  trunkFar: hex('#5e5854'), trunkMid: hex('#8a7a70'), trunkBig: hex('#3f3936'),
+  groundBar: hex('#dccdc1'), groundDot: hex('#d7d2c6'),
+  log: hex('#c2621f'), logHot: hex('#ffe09a'), kindling: hex('#e07a2a'),
+  fog: hex('#9ca29b'),
+  moon: hex('#f0ede2'),
+  status: hex('#b2a89e'),
+  fly: [hex('#f2d64a'), hex('#e8c43c'), hex('#bfe05a'), hex('#8fd46a')],
+  smoke: hex('#e0dbcd'), smokeDim: hex('#66635c'),
+  help: hex('#d8d2c8'),
+};
+// fire: heat, glyph, colour
+const FIRE = [
+  [0.13, '.', hex('#7a200e')], [0.19, "'", hex('#a83018')], [0.26, '^', hex('#c8441c')],
+  [0.33, '+', hex('#de6a24')], [0.4, '*', hex('#ea9632')], [0.46, 'x', hex('#f0c442')],
+  [0.55, 'X', hex('#f4e25a')], [0.9, '#', hex('#f6ecae')], [1.02, '@', hex('#fbf3c6')],
+];
+const FIRE_COL = [[0.07, '#7a200e'], [0.15, '#a83018'], [0.25, '#c8441c'], [0.38, '#de6224'], [0.5, '#ea8a2e'],
+  [0.62, '#f2cc5c'], [0.74, '#f3e47c'], [0.88, '#f6ec9c'], [1.0, '#fbf3c6']].map(([h, c]) => [h, hex(c)]);
+const fireRGB = [0, 0, 0];
+function fireCol(h) {
+  let k = 0;
+  while (k + 1 < FIRE_COL.length && h >= FIRE_COL[k + 1][0]) k++;
+  const a = FIRE_COL[k], b = FIRE_COL[Math.min(k + 1, FIRE_COL.length - 1)];
+  const w = b === a ? 0 : clamp((h - a[0]) / (b[0] - a[0]), 0, 1);
+  for (let c = 0; c < 3; c++) fireRGB[c] = a[1][c] + (b[1][c] - a[1][c]) * w;
+  return fireRGB;
+}
+const EMBER = [hex('#ffe27a'), hex('#f7a43a'), hex('#e0662a'), hex('#a83a1a'), hex('#5e1c0c')];
+
+const K_SKY = 0, K_GROUND = 1, K_TREE = 2, K_TRUNK = 3, K_LOG = 4, K_SNOW = 5, K_FIRE = 6, K_EMBER = 7,
+  K_MOON = 8, K_FLY = 9, K_SMOKE = 10, K_FOG = 11, K_TEXT = 12, K_PUFF = 13;
+const GLOW_GAIN = new Float32Array([0, 0.0, 0.0, 0, 0.3, 0.08, 0.22, 0.3, 0.1, 1.0, 0.05, 0.0, 0, 0.1]);
+
+// grid
+let W = 0, H = 0, N = 0;
+let G, C, D, KD;  // glyph, colour, depth, kind
+let scene = null;
+let ink = new Float32Array(96).fill(0.15);
+
+// wind gusts
+const GUST = [[0.26, 60, 0.7], [0.15, 24, 2.1], [0.08, 11, 4.0]];  // strength, period (s), phase
+const gustN = (per, T) => Math.max(1, Math.round(T / per));
+function gust(t, T) { let g = 1; for (const [a, per, p] of GUST) g += a * Math.sin(TAU * gustN(per, T) * t / T + p); return g; }
+function gustInt(t, T) {
+  let g = t;
+  for (const [a, per, p] of GUST) { const n = gustN(per, T); g += a * (T / (TAU * n)) * (Math.cos(p) - Math.cos(TAU * n * t / T + p)); }
+  return g;
+}
+let windOffset = 0;  // so the drift doesn't jump when wind changes
+const windAcc = t => S.wind * gustInt(t, scene.T) + windOffset;
+
+// scene
+function buildScene() {
+  const T = S.loop;
+  const rnd = rngOf(S.seed * 7919 + 13);
+  const sc = { T };
+  const bG = new Uint8Array(N), bC = new Uint8Array(N * 4), bD = new Float32Array(N), bK = new Uint8Array(N);
+  const tierOf = new Int32Array(N).fill(-1), snowH = new Float32Array(N), snowGl = new Uint8Array(N);
+  const put = (x, y, ch, col, depth, kind) => {
+    x = Math.round(x); y = Math.round(y);
+    if (x < 0 || y < 0 || x >= W || y >= H) return -1;
+    const i = y * W + x;
+    bG[i] = typeof ch === 'string' ? GI(ch) : ch;
+    bC[i * 4] = clamp(col[0], 0, 255); bC[i * 4 + 1] = clamp(col[1], 0, 255); bC[i * 4 + 2] = clamp(col[2], 0, 255);
+    bD[i] = depth; bK[i] = kind; tierOf[i] = -1;
+    return i;
+  };
+
+  // ground
+  const gTop = Math.round(H * 0.665);
+  sc.gTop = gTop;
+  for (let y = gTop; y < H; y++) {
+    const d = (y - gTop) / Math.max(1, H - 1 - gTop);
+    const fill = y - gTop < 3 ? 0.45 + 0.2 * (y - gTop) : 1;
+    for (let x = 0; x < W; x++) {
+      if (hash3(x, y, 105) > fill) continue;
+      const n = n2(x * 0.085, y * 0.55, 101) * 0.7 + n2(x * 0.31, y * 1.7, 102) * 0.3;
+      const bright = (0.7 + 0.3 * d) * (0.9 + 0.2 * hash3(x, y, 104));
+      if (n > 0.95 - 0.75 * Math.pow(d, 1.5)) put(x, y, '=', sc3(P.groundBar, bright), 0, K_GROUND);
+      else {
+        const h = hash3(x, y, 103);
+        put(x, y, h < 0.92 ? ',' : '.', sc3(P.groundDot, bright), 0, K_GROUND);
+      }
+    }
+  }
+
+  // trees
+  const trees = [];
+  const nFar = Math.round(W / 2.6);
+  for (let i = 0; i < nFar; i++) {
+    const nt = 2 + Math.floor(rnd() * 4), th = H * (0.034 + rnd() * 0.03);
+    trees.push({ kind: 0, x0: rnd() * W, ytop: H * (0.27 + rnd() * 0.28), nt, th, hw: H * (0.03 + rnd() * 0.06) });
+  }
+  const nMid = Math.max(3, Math.round(W / 20));
+  for (let i = 0; i < nMid; i++) {
+    const nt = 5 + Math.floor(rnd() * 3), ytop = H * (0.12 + rnd() * 0.17), fb = H * (0.6 + rnd() * 0.1);
+    trees.push({ kind: 1, x0: W * (0.05 + 0.9 * (i + 0.5 + (rnd() - 0.5) * 1.1) / nMid), ytop, nt, th: (fb - ytop) / nt, hw: H * (0.09 + rnd() * 0.07) });
+  }
+  for (const side of [0, 1]) {
+    trees.push({ kind: 2, x0: side ? W - 1 - H * 0.04 : H * 0.03, ytop: -H * 0.07, nt: 8, th: H * 0.117, hw: H * 0.38 });
+  }
+  for (const tr of trees) {
+    tr.fb = tr.ytop + tr.nt * tr.th;
+    tr.base = tr.kind === 2 ? H - 2 : tr.fb + (tr.kind === 1 ? 2 + rnd() * 4 : 1 + rnd() * 2);
+    tr.seed = Math.floor(rnd() * 1e9);
+    tr.tint = 0.88 + rnd() * 0.24;
+  }
+  trees.sort((a, b) => a.kind - b.kind || a.base - b.base);
+
+  const tiers = [];
+  const shedEvents = [];
+  const DEPTH = [0.3, 0.55, 0.85];
+  const TEX = [
+    { s: 'AAAA^^^mm..:', },
+    { s: 'AAAAA##m^m~_*.A#', },
+    { s: '##%%HHH#%H@#&H%#', },
+  ];
+  const SNOWCH = '***.*.*-.*_*.';
+  for (const tr of trees) {
+    const depth = DEPTH[tr.kind];
+    const tex = TEX[tr.kind].s;
+    const texCol = sc3([P.treeFar, P.treeMid, P.treeBig][tr.kind], tr.tint);
+    const edgeCol = sc3([P.edgeFar, P.edgeMid, P.edgeBig][tr.kind], tr.tint);
+    // trunk
+    const xc = Math.round(tr.x0);
+    for (let y = Math.floor(tr.fb) - 1; y <= Math.round(tr.base); y++) {
+      if (tr.kind === 0) put(xc, y, '|', P.trunkFar, depth, K_TRUNK);
+      else if (tr.kind === 1) { put(xc - 1, y, '[', P.trunkMid, depth, K_TRUNK); put(xc, y, '|', P.trunkMid, depth, K_TRUNK); put(xc + 1, y, ']', P.trunkMid, depth, K_TRUNK); }
+      else {
+        const w = Math.max(3, Math.round(H * 0.085)), xa = xc - Math.floor(w / 2);
+        for (let x = xa; x < xa + w; x++) put(x, y, hash3(x, y, 9) < 0.75 ? '|' : '!', sc3(P.trunkBig, 0.85 + 0.3 * hash3(x, y, 10)), depth, K_TRUNK);
+      }
+    }
+    // tiers
+    for (let ti = 0; ti < tr.nt; ti++) {
+      const tier = { id: tiers.length, kind: tr.kind };
+      // snow piles up and drops off a whole number of times per loop
+      const want = tr.kind === 0 ? 0 : T / 75;
+      let k = 0;
+      if (want > 0) { k = Math.floor(want + rnd()); if (rnd() < 0.35) k = 0; }
+      tier.k = k; tier.ph = rnd(); tier.s0 = 0.08 + rnd() * 0.12; tier.s1 = 0.8 + rnd() * 0.2; tier.fix = 0.25 + rnd() * 0.55;
+      tiers.push(tier);
+      const hwB = tr.hw * (0.16 + 0.84 * (ti + 1) / tr.nt);
+      const hwT = ti === 0 ? 0 : tr.hw * (0.16 + 0.84 * ti / tr.nt) * (tr.kind === 2 ? 0.62 : 0.45);
+      const y0 = Math.round(tr.ytop + ti * tr.th), y1 = Math.max(y0 + 1, Math.round(tr.ytop + (ti + 1) * tr.th));
+      let pl = null, pr = null;
+      for (let y = y0; y < y1; y++) {
+        const f = (y - y0 + 1) / (y1 - y0);
+        const half = hwT + (hwB - hwT) * f;
+        const xl = Math.round(tr.x0 - half), xr = Math.round(tr.x0 + half);
+        const cells = [];
+        if (xl >= xr) cells.push([xl, '^', edgeCol, 1]);
+        else {
+          cells.push([xl, '/', edgeCol, 1]); cells.push([xr, '\\', edgeCol, 1]);
+          if (pl !== null && pl - xl >= 2 && xl + 1 < xr - 1) cells.push([xl + 1, '/', edgeCol, 1]);
+          if (pr !== null && xr - pr >= 2 && xr - 1 > xl + 1) cells.push([xr - 1, '\\', edgeCol, 1]);
+          for (let x = xl + 1; x < xr; x++) {
+            if (cells.some(c => c[0] === x)) continue;
+            const h = hash3(x, y, tr.seed);
+            cells.push([x, tex[Math.floor(h * tex.length)], sc3(texCol, 0.86 + 0.28 * hash3(x, y, tr.seed + 1)), 0]);
+          }
+        }
+        pl = xl; pr = xr;
+        for (const [x, ch, col, edge] of cells) {
+          const i = put(x, y, ch, col, depth, K_TREE);
+          if (i < 0) continue;
+          tierOf[i] = tier.id;
+          snowH[i] = hash3(x, y, tr.seed + 2) * (0.45 + 0.9 * f) * (edge ? 0.8 : 1);
+          snowGl[i] = GI(SNOWCH[Math.floor(hash3(x, y, tr.seed + 3) * SNOWCH.length)]);
+        }
+      }
+      if (k > 0) {
+        for (let e = 0; e < k; e++) {
+          const te = ((e + 1 - tier.ph) / k) * T;
+          const side = hash3(tier.id, e, 31) < 0.5 ? -1 : 1;
+          const hw = tr.hw * (0.16 + 0.84 * (ti + 1) / tr.nt);
+          const bx = tr.x0 + side * hw * 0.85, by = tr.ytop + (ti + 1) * tr.th;
+          const r2 = rngOf(tier.id * 977 + e * 13 + S.seed);
+          const n = 7 + Math.floor(r2() * 8);
+          for (let p = 0; p < n; p++) {
+            shedEvents.push({ t: ((te % T) + T) % T, x: bx + (r2() * 4 - 2), y: by + (r2() * 2 - 1.5), vx: side * (0.4 + r2() * 1.6), vy: r2() * 2, life: 1.3 + r2() * 1.9, depth });
+          }
+        }
+      }
+    }
+  }
+  sc.tiers = tiers;
+  sc.puffs = shedEvents;
+  sc.level = new Float32Array(tiers.length);
+
+  // fire and logs
+  sc.Fw = Math.max(9, Math.round(H * 0.3));
+  sc.Fh = Math.max(8, Math.round(H * 0.42));
+  sc.fx = Math.round(W * 0.49);
+  sc.fireBottom = H - 5;
+  sc.fx0 = sc.fx - Math.floor(sc.Fw / 2);
+  const logY = H - 3, ls = sc.Fw / 12, LX = (d) => sc.fx + Math.round(d * ls);
+  for (let x = LX(-4); x <= LX(2); x++) put(x, logY, '=', sc3(P.log, 0.85 + 0.3 * hash3(x, logY, 6)), 0.7, K_LOG);
+  put(LX(-5), logY, '*', P.logHot, 0.7, K_LOG); put(LX(-3), logY, '*', P.logHot, 0.7, K_LOG);
+  put(LX(-6), logY, '\\', P.kindling, 0.7, K_LOG); put(LX(4), logY, '/', P.kindling, 0.7, K_LOG);
+  for (const d of [-4, 0, 2]) put(LX(d), H - 4, '/', P.kindling, 0.7, K_LOG);
+
+  // moon
+  sc.moonCells = [];
+  const mx = Math.round(W * 0.82), my = Math.max(2, Math.round(H * 0.14)), rx = H * 0.046, ry = H * 0.02;
+  for (let y = Math.floor(my - ry - 1); y <= Math.ceil(my + ry + 1); y++) {
+    for (let x = Math.floor(mx - rx - 1); x <= Math.ceil(mx + rx + 1); x++) {
+      const dx = (x - mx) / (rx + 0.5), dy = (y - my) / (ry + 0.5), d = Math.sqrt(dx * dx + dy * dy);
+      if (d > 1 || x < 0 || y < 0 || x >= W || y >= H) continue;
+      const shade = 1 - 0.25 * d * d - 0.18 * Math.max(0, dx + dy * 0.5) + 0.1 * (hash3(x, y, 77) - 0.5);
+      const crater = hash3(x, y, 78) < 0.16;
+      const ch = crater ? '+' : shade > 0.82 ? '@' : shade > 0.66 ? '0' : 'o';
+      sc.moonCells.push([y * W + x, GI(ch), sc3(P.moon, clamp(0.7 + 0.3 * shade, 0, 1))]);
+    }
+  }
+  sc.moon = { x: mx, y: my };
+
+  // firelight
+  const fy = H - 6, sx = H * 0.26, sy = H * 0.15;
+  sc.lfy = fy; sc.lsx = sx; sc.lsy = sy;
+  sc.light = [];
+  for (let y = Math.max(0, Math.floor(fy - sy * 3)); y < H; y++) {
+    for (let x = Math.max(0, Math.floor(sc.fx - sx * 3)); x < Math.min(W, sc.fx + sx * 3); x++) {
+      const v = Math.exp(-(((x - sc.fx) / sx) ** 2) - (((y - fy) / sy) ** 2));
+      if (v > 0.02) sc.light.push(y * W + x, v);
+    }
+  }
+  sc.lightIdx = new Int32Array(sc.light.filter((_, j) => j % 2 === 0));
+  sc.lightVal = new Float32Array(sc.light.filter((_, j) => j % 2 === 1));
+
+  // fog
+  sc.fogA = Math.floor(H * 0.35); sc.fogB = Math.floor(H * 0.88);
+  sc.fogP = 256;
+  sc.fogTex = [];
+  for (let r = sc.fogA; r < sc.fogB; r++) {
+    const row = new Float32Array(sc.fogP);
+    for (let c = 0; c < sc.fogP; c++) {
+      const v1 = n1p(c / 9, sc.fogP / 9, r * 3 + 1), v2 = n1p(c / 3, sc.fogP / 3, r * 3 + 2);
+      row[c] = v1 * 0.65 + v2 * 0.35;
+    }
+    sc.fogTex.push(row);
+  }
+  sc.fogCells = null; sc.fogT = -1;
+
+  // snowflakes, each on a loop that divides the scene loop
+  const maxFlakes = Math.round(0.31 * 4 * W * H);
+  const fl = {
+    n: maxFlakes, z: new Float32Array(maxFlakes), v: new Float32Array(maxFlakes), L: new Float32Array(maxFlakes),
+    k: new Int32Array(maxFlakes), ph: new Float32Array(maxFlakes), y0: new Float32Array(maxFlakes), y1: new Float32Array(maxFlakes),
+    fz: new Float32Array(maxFlakes), sa: new Float32Array(maxFlakes), sk: new Int32Array(maxFlakes), sp: new Float32Array(maxFlakes),
+    g: new Uint8Array(maxFlakes), b: new Float32Array(maxFlakes),
+    cyc: new Int32Array(maxFlakes).fill(-2147483648), ws: new Float32Array(maxFlakes), x0: new Float32Array(maxFlakes),
+  };
+  const rs = rngOf(S.seed * 31 + 5);
+  for (let i = 0; i < maxFlakes; i++) {
+    const z = rs();
+    fl.z[i] = z;
+    const v = (1.2 + 5.2 * Math.pow(z, 1.3)) * (0.9 + 0.2 * rs());
+    fl.y0[i] = -1 - rs() * 3;
+    fl.y1[i] = lerp(H * 0.62, H + 1, Math.pow(z, 0.8)) + rs() * 4 - 2;
+    const path = fl.y1[i] - fl.y0[i];
+    const k = Math.max(1, Math.floor((v * T) / (path * 1.08)));
+    fl.k[i] = k; fl.L[i] = (v * T) / k; fl.v[i] = v;
+    fl.ph[i] = rs() * fl.L[i];
+    fl.fz[i] = 0.55 + 1.45 * z;
+    fl.sa[i] = 0.25 + 0.9 * z * rs();
+    fl.sk[i] = Math.max(1, Math.round(T * (0.07 + 0.21 * rs())));
+    fl.sp[i] = rs() * TAU;
+    fl.g[i] = GI(z < 0.42 ? '.' : z < 0.92 ? '*' : rs() < 0.6 ? '0' : 'o');
+    fl.b[i] = 0.55 + 0.45 * z;
+  }
+  sc.fl = fl;
+
+  // smoke
+  sc.smoke = [];
+  {
+    const r = rngOf(S.seed * 101 + 7), n = Math.round(5 * T);
+    for (let i = 0; i < n; i++) sc.smoke.push({ t: r() * T, x: (r() - 0.5) * 6, y: r() * 2, vy: 0.85 + r() * 1.1, vx: 0.18 + r() * 0.27, sw: r() * TAU, life: 4.8 + r() * 6.4, big: r() });
+  }
+  // sparks
+  sc.sparks = [];
+  {
+    const r = rngOf(S.seed * 211 + 9), n = Math.max(1, Math.round(0.45 * T));
+    for (let i = 0; i < n; i++) {
+      sc.sparks.push({ t: r() * T, x: (r() - 0.5) * 4, y: 0.45 + r() * 0.35, vy: 1.6 + r() * 1.6, sw: 0.4 + r() * 0.8, fs: 0.3 + r() * 0.5, sp: r() * TAU, life: 2.2 + r() * 2.0 });
+    }
+  }
+  // fireflies
+  sc.flies = [];
+  {
+    const r = rngOf(S.seed * 401 + 3), n = Math.round(6 * W * H / 420);
+    for (let i = 0; i < n; i++) {
+      const kk = () => Math.max(1, Math.round(T * (0.009 + r() * 0.03)));
+      sc.flies.push({
+        x: r() * W, y: H * (0.16 + r() * 0.72),
+        ax: 2 + r() * 7, ay: 0.6 + r() * 2.2, bx: 0.5 + r() * 2, by: 0.3 + r() * 0.8,
+        k1: kk(), k2: kk() * 3, k3: kk(), k4: kk() * 2, p1: r() * TAU, p2: r() * TAU, p3: r() * TAU, p4: r() * TAU,
+        kb: Math.max(1, Math.round(T * (0.07 + r() * 0.15))), pb: r() * TAU, duty: 0.35 + r() * 0.35,
+        col: P.fly[Math.floor(r() * r() * P.fly.length)],
+      });
+    }
+  }
+
+  sc.bG = bG; sc.bC = bC; sc.bD = bD; sc.bK = bK;
+  sc.tierOf = tierOf; sc.snowH = snowH; sc.snowGl = snowGl;
+  const tc = [];
+  for (let i = 0; i < N; i++) if (tierOf[i] >= 0) tc.push(i);
+  sc.treeCells = new Int32Array(tc);
+  scene = sc;
+  buildFire();
+}
+
+function n1p(x, period, s) {
+  const i = Math.floor(x), f = x - i, u = f * f * (3 - 2 * f);
+  const p = Math.max(1, Math.round(period));
+  const a = hash3(((i % p) + p) % p, s, 3), b = hash3((((i + 1) % p) + p) % p, s, 3);
+  return a + (b - a) * u;
+}
+
+// fire
+function buildFire() {
+  const sc = scene, a = S.fire / 1.7;
+  sc.hs = new Float32Array(sc.Fw * sc.Fh);
+  sc.fireH = Math.min(sc.Fh - 5, H * 0.27 * Math.sqrt(a));
+  sc.fireHW = Math.min(sc.Fw / 2 - 0.5, sc.Fw * 0.38 * Math.pow(a, 0.3));
+}
+// looping noise, about f wobbles a second
+function pn(t, f, s, off) { const p = Math.max(1, Math.round(f * scene.T)); return n1p(t * p / scene.T + (off || 0), p, s); }
+function n2p(x, y, py, s) {
+  const xi = Math.floor(x), yi = Math.floor(y), fx = x - xi, fy = y - yi;
+  const ux = fx * fx * (3 - 2 * fx), uy = fy * fy * (3 - 2 * fy);
+  const y0 = ((yi % py) + py) % py, y1 = (y0 + 1) % py;
+  const a = hash3(xi, y0, s), b = hash3(xi + 1, y0, s), c = hash3(xi, y1, s), d = hash3(xi + 1, y1, s);
+  return a + (b - a) * ux + (c - a) * uy + (a - b - c + d) * ux * uy;
+}
+function fireHeat(t) {
+  const sc = scene, T = sc.T, Fw = sc.Fw, Fh = sc.Fh, hs = sc.hs, cen = (Fw - 1) / 2, hw = sc.fireHW;
+  const g = 1 + 0.05 * (2 * pn(t, 0.17, 61) - 1) + 0.025 * (2 * pn(t, 0.41, 62) - 1);
+  const hN = sc.fireH * g, lean = 0.035 * S.wind * gust(t, T);
+  const py = Math.max(1, Math.round(2.1 * T)), rise = py / T;
+  for (let y = 0; y < Fh; y++) {
+    const yb = Fh - 1 - y;
+    for (let x = 0; x < Fw; x++) {
+      const xl = x - lean * yb, u = (xl - cen) / hw;
+      let h = 0;
+      if (Math.abs(u) < 1) {
+        // tongues
+        const tg = 0.15 * (2 * pn(t, 0.55, 71, xl * 0.3) - 1) + 0.05 * (2 * pn(t, 1.3, 72, xl * 0.7) - 1);
+        const hx = hN * Math.pow(1 - u * u, 0.75) * (1 + tg);
+        const sv = (yb + 0.5) / Math.max(0.5, hx);
+        const turb = n2p(xl * 0.55, yb * 0.42 - t * rise, py, 81) - 0.5;
+        if (sv < 1) h = 1.15 * (1 - 0.5 * u * u) * (1 - sv * sv) * (1 + (0.1 + 0.45 * sv * sv + 0.15 * u * u) * 2 * turb);
+        else if (sv < 1.3) h = Math.max(0, turb - 0.18) * 1.4 * (1.3 - sv) / 0.3;
+      }
+      hs[y * Fw + x] = h > 0 ? h : 0;
+    }
+  }
+}
+
+// one frame at time t
+function compose(t) {
+  const sc = scene, T = sc.T;
+  t = ((t % T) + T) % T;
+  G.set(sc.bG); C.set(sc.bC); D.set(sc.bD); KD.set(sc.bK);
+  const setc = (i, gl, col, depth, kind) => {
+    G[i] = gl; const j = i * 4; C[j] = col[0] > 255 ? 255 : col[0]; C[j + 1] = col[1] > 255 ? 255 : col[1]; C[j + 2] = col[2] > 255 ? 255 : col[2]; D[i] = depth; KD[i] = kind;
+  };
+
+  const sAmt = Math.min(1.6, 0.35 + 0.42 * S.snow);
+  for (let k = 0; k < sc.tiers.length; k++) {
+    const tr = sc.tiers[k];
+    const lv = tr.k ? lerp(tr.s0, tr.s1, frac((t * tr.k) / T + tr.ph)) : tr.fix;
+    sc.level[k] = lv * [0.45, 0.8, 0.95][tr.kind] * sAmt;
+  }
+  const tc = sc.treeCells;
+  for (let n = 0; n < tc.length; n++) {
+    const i = tc[n];
+    const tid = sc.tierOf[i];
+    if (sc.snowH[i] < sc.level[tid]) {
+      const col = sc.tiers[tid].kind === 0 ? P.snowTreeFar : P.snowTree;
+      setc(i, sc.snowGl[i], sc3(col, 0.9 + 0.1 * (sc.snowH[i] * 7 % 1)), D[i], K_SNOW);
+    }
+  }
+
+  // fire and glow
+  fireHeat(t);
+  const hs = sc.hs;
+  const breath = 1 + 0.11 * Math.sin(TAU * Math.max(1, Math.round(T / 5.5)) * t / T + 0.6) + 0.05 * (2 * pn(t, 0.23, 95) - 1);
+  sc.breath = breath;
+  const inten = breath;
+
+  // firelight
+  if (S.glow) {
+    const li = sc.lightIdx, lv = sc.lightVal, a = 0.6 * inten * Math.min(1.3, S.fire / 1.7);
+    for (let n = 0; n < li.length; n++) {
+      const i = li[n], kd = KD[i];
+      if (G[i] === 0 || kd === K_LOG) continue;
+      const w = lv[n] * a * (kd === K_TREE || kd === K_SNOW ? 0.55 : 1);
+      const j = i * 4;
+      C[j] = Math.min(255, C[j] * (1 + 0.2 * w) + 50 * w);
+      C[j + 1] = Math.min(255, C[j + 1] * (1 - 0.12 * w) + 18 * w);
+      C[j + 2] = C[j + 2] * (1 - 0.55 * w);
+    }
+  }
+
+  // fog
+  const fogStep = Math.floor(t * 4);
+  if (sc.fogT !== fogStep) {
+    sc.fogT = fogStep;
+    const tt = fogStep / 4, H0 = H;
+    const br = 0.85 + 0.25 * Math.sin(TAU * Math.max(1, Math.round(T / 23.3)) * tt / T);
+    const oxA = Math.floor(tt * 0.8), oxB = Math.floor((tt - T) * 0.8), w = tt / T;
+    const nrm = 1 / Math.sqrt((1 - w) * (1 - w) + w * w);
+    const cells = [];
+    for (let r = sc.fogA; r < sc.fogB; r++) {
+      const prof = Math.exp(-(((r - H0 * 0.64) / (H0 * 0.14)) ** 2));
+      if (prof < 0.08) continue;
+      const row = sc.fogTex[r - sc.fogA];
+      for (let c = 0; c < W; c++) {
+        const i = r * W + c;
+        if (sc.bG[i] !== 0) continue;
+        const a = row[(((c - oxA) % sc.fogP) + sc.fogP) % sc.fogP], b = row[(((c - oxB) % sc.fogP) + sc.fogP) % sc.fogP];
+        const v = (0.5 + ((1 - w) * (a - 0.5) + w * (b - 0.5)) * nrm) * prof * br;
+        if (v < 0.33) continue;
+        const ch = v > 0.62 ? ':' : hash3(c, r, fogStep) < 0.12 ? "'" : '.';
+        cells.push(i, GI(ch), v);
+      }
+    }
+    sc.fogCells = cells;
+  }
+  for (let n = 0; n < sc.fogCells.length; n += 3) {
+    const i = sc.fogCells[n];
+    if (G[i] === 0) setc(i, sc.fogCells[n + 1], sc3(P.fog, 0.62 + 0.5 * sc.fogCells[n + 2]), 0.05, K_FOG);
+  }
+
+  // moon
+  if (S.moon) for (const [i, gl, col] of sc.moonCells) if (D[i] < 0.2) setc(i, gl, col, 0.12, K_MOON);
+
+  // snow
+  const fl = sc.fl, nAct = Math.min(fl.n, Math.round(0.31 * S.snow * W * H)), wa = windAcc(t);
+  const flakeLight = S.glow ? Math.min(1, inten * Math.min(1.3, S.fire / 1.7)) : 0;
+  for (let i = 0; i < nAct; i++) {
+    const u = fl.v[i] * t + fl.ph[i];
+    const j = Math.floor(u / fl.L[i]);
+    const y = fl.y0[i] + (u - j * fl.L[i]);
+    if (y > fl.y1[i]) continue;
+    if (j !== fl.cyc[i]) {
+      fl.cyc[i] = j;
+      const k = fl.k[i], jm = ((j % k) + k) % k;
+      const ts = (j * fl.L[i] - fl.ph[i]) / fl.v[i];
+      fl.ws[i] = windAcc(ts);
+      const fall = (fl.y1[i] - fl.y0[i]) / fl.v[i], drift = fl.fz[i] * S.wind * fall;
+      const span = W + Math.abs(drift) + 4;
+      fl.x0[i] = hash3(i, jm, 17) * span - 2 - Math.max(0, drift);
+    }
+    const x = fl.x0[i] + fl.fz[i] * (wa - fl.ws[i]) + fl.sa[i] * Math.sin(TAU * fl.sk[i] * t / T + fl.sp[i]);
+    const cx = Math.floor(x), cy = Math.floor(y);
+    if (cx < 0 || cy < 0 || cx >= W || cy >= H) continue;
+    const c = cy * W + cx, z = fl.z[i];
+    if (z < D[c]) continue;
+    const col = mix3(P.snowFar, P.snowNear, Math.pow(z, 0.8));
+    if (flakeLight > 0) {
+      const lw = flakeLight * Math.exp(-(((cx - sc.fx) / sc.lsx) ** 2) - (((cy - sc.lfy) / sc.lsy) ** 2));
+      if (lw > 0.03) { col[0] = Math.min(255, col[0] * (1 + 0.1 * lw) + 40 * lw); col[1] = col[1] * (1 - 0.35 * lw) + 10 * lw; col[2] = col[2] * (1 - 0.8 * lw); }
+    }
+    setc(c, fl.g[i], col, z, K_SNOW);
+  }
+
+  for (const p of sc.puffs) {
+    const a = ((t - p.t) % T + T) % T;
+    if (a > p.life) continue;
+    const x = p.x + 0.6 * p.vx * a + 0.2 * S.wind * a * a, y = p.y + 0.6 * p.vy * a + 1.9 * a * a;
+    const cx = Math.round(x), cy = Math.round(y);
+    if (cx < 0 || cy < 0 || cx >= W || cy >= H - 1) continue;
+    const c = cy * W + cx, q = a / p.life;
+    if (D[c] > p.depth + 0.01) continue;
+    setc(c, GI(q < 0.3 ? '*' : q < 0.65 ? 'o' : q < 0.85 ? '.' : "'"), sc3(P.snowNear, 1 - 0.45 * q), p.depth, K_PUFF);
+  }
+
+  // smoke
+  const fTop = sc.fireBottom - Math.round(sc.fireH) - 1;
+  for (const p of sc.smoke) {
+    const a = ((t - p.t) % T + T) % T;
+    if (a > p.life) continue;
+    const q = a / p.life;
+    const y = fTop + p.y - p.vy * 7.5 * (1 - Math.exp(-a / 7.5));
+    const x = sc.fx + p.x + p.vx * S.wind * gust(t, T) * a * 0.9 + 0.8 * Math.sin(a * 0.8 + p.sw);
+    const cx = Math.round(x), cy = Math.round(y);
+    if (cx < 0 || cy < 0 || cx >= W || cy >= H) continue;
+    const c = cy * W + cx;
+    if (D[c] > 0.6) continue;
+    const ch = q < 0.22 ? (p.big < 0.5 ? '0' : 'O') : q < 0.5 ? (p.big < 0.6 ? '0' : 'o') : q < 0.75 ? (p.big < 0.5 ? 'o' : ',') : (p.big < 0.5 ? '.' : ',');
+    setc(c, GI(ch), mix3(P.smoke, P.smokeDim, q * q * q), 0.6, K_SMOKE);
+  }
+
+  // fire
+  for (let y = 0; y < sc.Fh; y++) {
+    for (let x = 0; x < sc.Fw; x++) {
+      const h = hs[y * sc.Fw + x];
+      if (h < FIRE[0][0]) continue;
+      let k = 0;
+      while (k + 1 < FIRE.length && h >= FIRE[k + 1][0]) k++;
+      const gx = sc.fx0 + x, gy = sc.fireBottom - sc.Fh + 1 + y;
+      if (gx < 0 || gx >= W || gy < 0 || gy >= H) continue;
+      setc(gy * W + gx, GI(FIRE[k][1]), fireCol(h), 0.7, K_FIRE);
+    }
+  }
+
+  // sparks
+  for (const p of sc.sparks) {
+    const a = ((t - p.t) % T + T) % T;
+    if (a > p.life) continue;
+    const q = a / p.life;
+    const x = sc.fx + p.x + 0.25 * S.wind * a + p.sw * Math.sin(TAU * p.fs * a + p.sp);
+    const y = sc.fireBottom - p.y * sc.fireH - p.vy * a;
+    const cx = Math.round(x), cy = Math.round(y);
+    if (cx < 0 || cy < 0 || cx >= W || cy >= H - 1) continue;
+    const c = cy * W + cx;
+    if (KD[c] === K_FIRE) continue;
+    setc(c, GI(q < 0.25 ? '*' : q < 0.6 ? "'" : '.'), EMBER[Math.min(EMBER.length - 1, Math.floor(q * EMBER.length))], 0.95, K_EMBER);
+  }
+
+  // fireflies
+  const nFlies = Math.min(sc.flies.length, Math.round(S.flies * W * H / 420));
+  for (let n = 0; n < nFlies; n++) {
+    const f = sc.flies[n];
+    const blink = Math.sin(TAU * f.kb * t / T + f.pb);
+    if (blink < 1 - 2 * f.duty) continue;
+    const x = f.x + f.ax * Math.sin(TAU * f.k1 * t / T + f.p1) + f.bx * Math.sin(TAU * f.k2 * t / T + f.p2);
+    const y = f.y + f.ay * Math.sin(TAU * f.k3 * t / T + f.p3) + f.by * Math.sin(TAU * f.k4 * t / T + f.p4);
+    const cx = ((Math.round(x) % W) + W) % W, cy = Math.round(y);
+    if (cy < 0 || cy >= H - 1) continue;
+    const c = cy * W + cx;
+    const lit = clamp((blink - (1 - 2 * f.duty)) * 3, 0.35, 1);
+    setc(c, GI(lit > 0.5 ? '+' : '.'), sc3(f.col, 0.55 + 0.45 * lit), 0.9, K_FLY);
+  }
+
+  // status bar and help
+  if (S.bar) drawText(0, H - 1, statusText(), P.status);
+  if (showHelp) drawHelp();
+}
+
+function statusText() {
+  return ' WINTER NIGHT | speed ' + S.speed.toFixed(2) + ' | wind ' + S.wind.toFixed(1) + ' | snow ' + S.snow.toFixed(1) +
+    ' | fire ' + S.fire.toFixed(1) + ' | flies ' + S.flies.toFixed(1) + ' | glow ' + (S.glow ? 'on' : 'off') +
+    ' | moon ' + (S.moon ? 'on' : 'off') + ' | ' + (CAPTURE || !fpsShown ? S.fps : fpsShown) + ' fps | [H]elp';
+}
+function drawText(x, y, s, col) {
+  for (let k = 0; k < s.length && x + k < W; k++) {
+    if (x + k < 0 || y < 0 || y >= H) continue;
+    const i = y * W + x + k;
+    G[i] = GI(s[k]); C[i * 4] = col[0]; C[i * 4 + 1] = col[1]; C[i * 4 + 2] = col[2]; D[i] = 2; KD[i] = K_TEXT;
+  }
+}
+function drawHelp() {
+  const lines = [
+    'WINTER NIGHT  -  keys',
+    '',
+    'H        show or hide this help',
+    '[  ]     slower / faster',
+    'w  W     less / more wind',
+    's  S     less / more snow',
+    'f  F     smaller / bigger fire',
+    'l  L     fewer / more fireflies',
+    'G        glow on / off',
+    'M        moon on / off',
+    'B        status line on / off',
+  ];
+  const w = Math.max(...lines.map(l => l.length)) + 4, h = lines.length + 2;
+  const x0 = Math.floor((W - w) / 2), y0 = Math.floor((H - h) / 2);
+  for (let y = 0; y < h; y++) {
+    let row;
+    if (y === 0 || y === h - 1) row = '+' + '-'.repeat(w - 2) + '+';
+    else row = '| ' + lines[y - 1].padEnd(w - 4) + ' |';
+    drawText(x0, y0 + y, row, P.help);
+  }
+}
+
+// glow
+let glowBuf, glowTmp, glowOut;
+function computeGlow() {
+  const gain = GLOW_GAIN;
+  for (let i = 0; i < N; i++) {
+    const g = G[i];
+    const k = g ? gain[KD[i]] * ink[g] : 0;
+    const j = i * 3;
+    glowBuf[j] = C[i * 4] * k; glowBuf[j + 1] = C[i * 4 + 1] * k; glowBuf[j + 2] = C[i * 4 + 2] * k;
+  }
+  // cells are half as wide as tall, so blur wider in x
+  const kx = [0.06, 0.13, 0.19, 0.24, 0.19, 0.13, 0.06], ky = [0.17, 0.66, 0.17].map(v => v);
+  const sx = kx.length >> 1, sy = ky.length >> 1;
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+    let r = 0, g = 0, b = 0;
+    for (let k = -sx; k <= sx; k++) { const xx = x + k; if (xx < 0 || xx >= W) continue; const j = (y * W + xx) * 3, w = kx[k + sx]; r += glowBuf[j] * w; g += glowBuf[j + 1] * w; b += glowBuf[j + 2] * w; }
+    const o = (y * W + x) * 3; glowTmp[o] = r; glowTmp[o + 1] = g; glowTmp[o + 2] = b;
+  }
+  const sc = scene;
+  const fireA = S.fire / 1.7;
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+    let r = 0, g = 0, b = 0;
+    for (let k = -sy; k <= sy; k++) { const yy = y + k; if (yy < 0 || yy >= H) continue; const j = (yy * W + x) * 3, w = ky[k + sy]; r += glowTmp[j] * w; g += glowTmp[j + 1] * w; b += glowTmp[j + 2] * w; }
+    const dfx = (x - sc.fx) / (H * 0.3), dfy = (y - (H - 8)) / (H * 0.17);
+    const fh = Math.exp(-(dfx * dfx + dfy * dfy)) * 0.04 * fireA * (sc.breath || 1);
+    r += 255 * fh; g += 120 * fh; b += 40 * fh;
+    if (S.moon) {
+      const dmx = (x - sc.moon.x) / (H * 0.12), dmy = (y - sc.moon.y) / (H * 0.06);
+      const mh = Math.exp(-(dmx * dmx + dmy * dmy)) * 0.05;
+      r += 230 * mh; g += 228 * mh; b += 220 * mh;
+    }
+    const o = (y * W + x) * 4;
+    glowOut[o] = r / 255; glowOut[o + 1] = g / 255; glowOut[o + 2] = b / 255; glowOut[o + 3] = 1;
+  }
+}
+
+// drawing
+const canvas = document.getElementById('c');
+let gl = null, prog = null, tex = {}, ctx2d = null;
+let cellW = 8, cellH = 15, offX = 0, offY = 0, atlas = null;
+const FONT_STACK = '"WNMono", "DejaVu Sans Mono", Menlo, Consolas, "Courier New", monospace';
+
+function buildAtlas() {
+  const cv = document.createElement('canvas');
+  cv.width = cellW * 16; cv.height = cellH * 6;
+  const x = cv.getContext('2d', { willReadFrequently: true });
+  const wt = S.bold ? '700 ' : '400 ';
+  x.font = wt + '100px ' + FONT_STACK;
+  const m = x.measureText('M');
+  const adv = m.width / 100;
+  const asc = (m.fontBoundingBoxAscent || 92.8) / 100, desc = (m.fontBoundingBoxDescent || 23.6) / 100;
+  const fs = cellW / adv;
+  x.font = wt + fs + 'px ' + FONT_STACK;
+  x.fillStyle = '#fff';
+  x.textBaseline = 'alphabetic';
+  const base = Math.round((cellH - (asc + desc) * fs) / 2 + asc * fs);
+  // clip each glyph to its tile or descenders bleed into the row below
+  for (let i = 1; i < 95; i++) {
+    const ox = (i % 16) * cellW, oy = Math.floor(i / 16) * cellH;
+    x.save(); x.beginPath(); x.rect(ox, oy, cellW, cellH); x.clip();
+    x.fillText(String.fromCharCode(32 + i), ox, oy + base);
+    x.restore();
+  }
+  const d = x.getImageData(0, 0, cv.width, cv.height).data;
+  const AW = cv.width, AH = cv.height;
+  const cov = new Float32Array(AW * AH);
+  for (let i = 0; i < AW * AH; i++) cov[i] = d[i * 4 + 3] / 255;
+  const sig = Math.max(0.8, cellW * 0.19), rad = Math.ceil(sig * 2.5);
+  const kern = []; let ks = 0;
+  for (let k = -rad; k <= rad; k++) { const v = Math.exp(-0.5 * (k / sig) ** 2); kern.push(v); ks += v; }
+  for (let k = 0; k < kern.length; k++) kern[k] /= ks;
+  const tmp = new Float32Array(AW * AH), blr = new Float32Array(AW * AH);
+  for (let y = 0; y < AH; y++) for (let xx = 0; xx < AW; xx++) {
+    const cx0 = Math.floor(xx / cellW) * cellW; let v = 0;
+    for (let k = -rad; k <= rad; k++) { const sx = xx + k; if (sx < cx0 || sx >= cx0 + cellW) continue; v += cov[y * AW + sx] * kern[k + rad]; }
+    tmp[y * AW + xx] = v;
+  }
+  for (let y = 0; y < AH; y++) for (let xx = 0; xx < AW; xx++) {
+    const cy0 = Math.floor(y / cellH) * cellH; let v = 0;
+    for (let k = -rad; k <= rad; k++) { const sy = y + k; if (sy < cy0 || sy >= cy0 + cellH) continue; v += tmp[sy * AW + xx] * kern[k + rad]; }
+    blr[y * AW + xx] = v;
+  }
+  const data = new Uint8Array(AW * AH * 4);
+  for (let i = 0; i < AW * AH; i++) { data[i * 4] = Math.round(cov[i] * 255); data[i * 4 + 1] = Math.min(255, Math.round(blr[i] * 255 * 1.6)); data[i * 4 + 3] = 255; }
+  ink = new Float32Array(96);
+  for (let i = 1; i < 95; i++) {
+    const ox = (i % 16) * cellW, oy = Math.floor(i / 16) * cellH;
+    let s = 0;
+    for (let yy = 0; yy < cellH; yy++) for (let xx = 0; xx < cellW; xx++) s += d[((oy + yy) * cv.width + ox + xx) * 4 + 3];
+    ink[i] = s / (255 * cellW * cellH);
+  }
+  // so busy glyphs like @ don't glow brighter
+  let mx = 0; for (let i = 1; i < 95; i++) mx = Math.max(mx, ink[i]);
+  for (let i = 1; i < 95; i++) ink[i] = Math.sqrt(ink[i] / mx);
+  return { cv, fs, base, wt, data, AW, AH };
+}
+
+function initGL() {
+  const g = canvas.getContext('webgl2', { antialias: false, alpha: false, depth: false, stencil: false, preserveDrawingBuffer: CAPTURE, powerPreference: 'low-power' });
+  if (!g) return null;
+  const vs = `#version 300 es
+in vec2 p; void main() { gl_Position = vec4(p, 0.0, 1.0); }`;
+  const fs = `#version 300 es
+precision highp float; precision highp int;
+uniform sampler2D uAtlas, uGlyph, uColor, uGlowT;
+uniform vec2 uCell, uOff, uGrid; uniform float uH, uGlowAmt; uniform vec3 uBg, uBg2;
+out vec4 o;
+void main() {
+  vec2 p = vec2(gl_FragCoord.x, uH - gl_FragCoord.y) - uOff;
+  vec2 cell = floor(p / uCell);
+  vec3 bg = mix(uBg, uBg2, smoothstep(0.55, 0.95, p.y / (uCell.y * uGrid.y)));
+  vec3 col = bg;
+  if (cell.x >= 0.0 && cell.y >= 0.0 && cell.x < uGrid.x && cell.y < uGrid.y) {
+    ivec2 ci = ivec2(cell);
+    float gi = floor(texelFetch(uGlyph, ci, 0).r * 255.0 + 0.5);
+    vec3 fg = texelFetch(uColor, ci, 0).rgb;
+    ivec2 lp = ivec2(p - cell * uCell);
+    ivec2 a0 = ivec2(int(mod(gi, 16.0)), int(floor(gi / 16.0))) * ivec2(uCell);
+    vec4 at = texelFetch(uAtlas, a0 + lp, 0);
+    float lum = dot(fg, vec3(0.3, 0.55, 0.15));
+    col = mix(bg, fg, at.r) + fg * at.g * (1.0 - at.r) * uGlowAmt * (0.12 + 0.46 * lum * lum);
+    if (uGlowAmt > 0.0) col += texture(uGlowT, p / (uCell * uGrid)).rgb * uGlowAmt * 1.3 * (1.0 - 0.8 * at.r);
+  }
+  o = vec4(col, 1.0);
+}`;
+  const sh = (type, src) => { const s = g.createShader(type); g.shaderSource(s, src); g.compileShader(s); if (!g.getShaderParameter(s, g.COMPILE_STATUS)) throw new Error(g.getShaderInfoLog(s)); return s; };
+  const pr = g.createProgram();
+  g.attachShader(pr, sh(g.VERTEX_SHADER, vs)); g.attachShader(pr, sh(g.FRAGMENT_SHADER, fs));
+  g.linkProgram(pr);
+  if (!g.getProgramParameter(pr, g.LINK_STATUS)) throw new Error(g.getProgramInfoLog(pr));
+  g.useProgram(pr);
+  const buf = g.createBuffer();
+  g.bindBuffer(g.ARRAY_BUFFER, buf);
+  g.bufferData(g.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), g.STATIC_DRAW);
+  const loc = g.getAttribLocation(pr, 'p');
+  g.enableVertexAttribArray(loc); g.vertexAttribPointer(loc, 2, g.FLOAT, false, 0, 0);
+  prog = pr;
+  return g;
+}
+function mkTex(unit, filter) {
+  const t = gl.createTexture();
+  gl.activeTexture(gl.TEXTURE0 + unit); gl.bindTexture(gl.TEXTURE_2D, t);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, filter); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, filter);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+  return t;
+}
+
+function layout() {
+  const dpr = window.devicePixelRatio || 1;
+  const cw = Math.max(1, Math.round(canvas.clientWidth * dpr)), ch = Math.max(1, Math.round(canvas.clientHeight * dpr));
+  canvas.width = cw; canvas.height = ch;
+  cellH = Math.max(6, Math.round(ch / S.rows));
+  cellW = Math.max(3, Math.round(cellH * 8 / 15));
+  W = Math.max(20, Math.floor(cw / cellW)); H = Math.max(12, Math.floor(ch / cellH));
+  offX = Math.floor((cw - W * cellW) / 2); offY = Math.floor((ch - H * cellH) / 2);
+  N = W * H;
+  G = new Uint8Array(N); C = new Uint8Array(N * 4); D = new Float32Array(N); KD = new Uint8Array(N);
+  for (let i = 0; i < N; i++) C[i * 4 + 3] = 255;
+  glowBuf = new Float32Array(N * 3); glowTmp = new Float32Array(N * 3); glowOut = new Float32Array(N * 4);
+  atlas = buildAtlas();
+  windOffset = 0;
+  buildScene();
+  if (gl) {
+    gl.viewport(0, 0, cw, ch);
+    gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
+    tex.atlas = tex.atlas || mkTex(0, gl.NEAREST);
+    gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, tex.atlas);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8, atlas.AW, atlas.AH, 0, gl.RGBA, gl.UNSIGNED_BYTE, atlas.data);
+    tex.glyph = tex.glyph || mkTex(1, gl.NEAREST);
+    gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, tex.glyph);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.R8, W, H, 0, gl.RED, gl.UNSIGNED_BYTE, G);
+    tex.color = tex.color || mkTex(2, gl.NEAREST);
+    gl.activeTexture(gl.TEXTURE2); gl.bindTexture(gl.TEXTURE_2D, tex.color);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8, W, H, 0, gl.RGBA, gl.UNSIGNED_BYTE, C);
+    tex.glow = tex.glow || mkTex(3, gl.LINEAR);
+    gl.activeTexture(gl.TEXTURE3); gl.bindTexture(gl.TEXTURE_2D, tex.glow);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA16F, W, H, 0, gl.RGBA, gl.FLOAT, glowOut);
+    const u = n => gl.getUniformLocation(prog, n);
+    gl.uniform1i(u('uAtlas'), 0); gl.uniform1i(u('uGlyph'), 1); gl.uniform1i(u('uColor'), 2); gl.uniform1i(u('uGlowT'), 3);
+    gl.uniform2f(u('uCell'), cellW, cellH); gl.uniform2f(u('uOff'), offX, offY); gl.uniform2f(u('uGrid'), W, H);
+    gl.uniform1f(u('uH'), ch);
+  }
+}
+
+function present() {
+  if (S.glow) computeGlow();
+  if (gl) {
+    gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, tex.glyph);
+    gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, 0, W, H, gl.RED, gl.UNSIGNED_BYTE, G);
+    gl.activeTexture(gl.TEXTURE2); gl.bindTexture(gl.TEXTURE_2D, tex.color);
+    gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, 0, W, H, gl.RGBA, gl.UNSIGNED_BYTE, C);
+    if (S.glow) { gl.activeTexture(gl.TEXTURE3); gl.bindTexture(gl.TEXTURE_2D, tex.glow); gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, 0, W, H, gl.RGBA, gl.FLOAT, glowOut); }
+    gl.uniform1f(gl.getUniformLocation(prog, 'uGlowAmt'), S.glow ? 1.0 : 0.0);
+    gl.uniform3f(gl.getUniformLocation(prog, 'uBg'), BG[0] / 255, BG[1] / 255, BG[2] / 255);
+    gl.uniform3f(gl.getUniformLocation(prog, 'uBg2'), BG2[0] / 255, BG2[1] / 255, BG2[2] / 255);
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+  } else draw2D();
+}
+
+// 2d fallback when there is no webgl2
+let glowCanvas = null;
+function draw2D() {
+  const x = ctx2d;
+  const bgr = x.createLinearGradient(0, offY, 0, offY + H * cellH);
+  bgr.addColorStop(0.55, 'rgb(' + BG.join(',') + ')'); bgr.addColorStop(0.95, 'rgb(' + BG2.join(',') + ')');
+  x.fillStyle = bgr; x.fillRect(0, 0, canvas.width, canvas.height);
+  if (S.glow) {
+    if (!glowCanvas) glowCanvas = document.createElement('canvas');
+    glowCanvas.width = W; glowCanvas.height = H;
+    const gx = glowCanvas.getContext('2d'), img = gx.createImageData(W, H);
+    for (let i = 0; i < N; i++) { img.data[i * 4] = Math.min(255, glowOut[i * 4] * 255); img.data[i * 4 + 1] = Math.min(255, glowOut[i * 4 + 1] * 255); img.data[i * 4 + 2] = Math.min(255, glowOut[i * 4 + 2] * 255); img.data[i * 4 + 3] = 255; }
+    gx.putImageData(img, 0, 0);
+    x.imageSmoothingEnabled = true;
+    x.globalCompositeOperation = 'lighter';
+    x.drawImage(glowCanvas, offX, offY, W * cellW, H * cellH);
+    x.globalCompositeOperation = 'source-over';
+  }
+  x.font = atlas.wt + atlas.fs + 'px ' + FONT_STACK; x.textBaseline = 'alphabetic';
+  for (let y = 0; y < H; y++) for (let c = 0; c < W; c++) {
+    const i = y * W + c;
+    if (!G[i]) continue;
+    x.fillStyle = 'rgb(' + C[i * 4] + ',' + C[i * 4 + 1] + ',' + C[i * 4 + 2] + ')';
+    x.fillText(String.fromCharCode(32 + G[i]), offX + c * cellW, offY + y * cellH + atlas.base);
+  }
+}
+
+// timing and keys
+let simT = 0, last = 0, due = 0, raf = 0, fpsShown = 0, fpsCount = 0, fpsSince = 0;
+function renderAt(t) { compose(t); present(); }
+function tick(now) {
+  raf = requestAnimationFrame(tick);
+  // average 1/fps so 25fps stays 25 on a 60hz screen
+  const gap = 1000 / S.fps;
+  if (due && now < due - 2) return;
+  due = due && now - due < gap ? due + gap : now + gap;
+  const dt = last ? Math.min(0.25, (now - last) / 1000) : 0;
+  last = now;
+  fpsCount++;
+  if (!fpsSince) fpsSince = now;
+  else if (now - fpsSince >= 1000) { fpsShown = Math.round(fpsCount * 1000 / (now - fpsSince)); fpsCount = 0; fpsSince = now; }
+  simT = (simT + dt * S.speed) % scene.T;
+  renderAt(simT);
+}
+function start() { if (!raf && !CAPTURE) { last = 0; due = 0; fpsSince = 0; fpsCount = 0; raf = requestAnimationFrame(tick); } }
+function stop() { if (raf) cancelAnimationFrame(raf); raf = 0; }
+document.addEventListener('visibilitychange', () => (document.hidden ? stop() : start()));
+
+function setWind(v) {
+  const was = windAcc(simT);
+  S.wind = clamp(Math.round(v * 10) / 10, -6, 6);
+  windOffset += was - windAcc(simT);
+}
+window.addEventListener('keydown', e => {
+  if (e.metaKey || e.ctrlKey || e.altKey) return;
+  const k = e.key;
+  let refire = false;
+  switch (k) {
+    case 'h': case 'H': case '?': showHelp = !showHelp; break;
+    case ']': case '+': case '=': S.speed = clamp(S.speed + 0.25, 0.25, 4); break;
+    case '[': case '-': case '_': S.speed = clamp(S.speed - 0.25, 0.25, 4); break;
+    case 'w': setWind(S.wind - 0.4); refire = true; break;
+    case 'W': setWind(S.wind + 0.4); refire = true; break;
+    case 's': S.snow = clamp(Math.round((S.snow - 0.2) * 10) / 10, 0, 4); break;
+    case 'S': S.snow = clamp(Math.round((S.snow + 0.2) * 10) / 10, 0, 4); break;
+    case 'f': S.fire = clamp(Math.round((S.fire - 0.2) * 10) / 10, 0.4, 3); refire = true; break;
+    case 'F': S.fire = clamp(Math.round((S.fire + 0.2) * 10) / 10, 0.4, 3); refire = true; break;
+    case 'l': S.flies = clamp(Math.round((S.flies - 0.4) * 10) / 10, 0, 6); break;
+    case 'L': S.flies = clamp(Math.round((S.flies + 0.4) * 10) / 10, 0, 6); break;
+    case 'g': case 'G': S.glow = !S.glow; break;
+    case 'm': case 'M': S.moon = !S.moon; break;
+    case 'b': case 'B': S.bar = !S.bar; break;
+    case 'Escape': showHelp = false; break;
+    default: return;
+  }
+  if (refire) buildFire();
+  e.preventDefault();
+  if (!raf) renderAt(simT);
+});
+
+let resizeTimer = 0;
+window.addEventListener('resize', () => {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(() => { layout(); renderAt(simT); }, 150);
+});
+
+async function boot() {
+  try {
+    for (const [data, weight] of [[FONT_WOFF2, '400'], [FONT_WOFF2_BOLD, '700']]) {
+      const face = new FontFace('WNMono', 'url(data:font/woff2;base64,' + data + ')', { weight });
+      await face.load();
+      document.fonts.add(face);
+    }
+  } catch (err) {}
+  try { gl = initGL(); } catch (err) { gl = null; }
+  if (!gl) ctx2d = canvas.getContext('2d');
+  layout();
+  renderAt(simT);
+  start();
+}
+boot();
+})();
+</script>
+<!--
+Font is DejaVu Sans Mono trimmed to ASCII, renamed WN Mono as its licence asks.
+
+Fonts are (c) Bitstream (see below). DejaVu changes are in public domain.
+Glyphs imported from Arev fonts are (c) Tavmjong Bah (see below)
+
+Bitstream Vera Fonts Copyright
+------------------------------
+
+Copyright (c) 2003 by Bitstream, Inc. All Rights Reserved. Bitstream Vera is
+a trademark of Bitstream, Inc.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of the fonts accompanying this license ("Fonts") and associated
+documentation files (the "Font Software"), to reproduce and distribute the
+Font Software, including without limitation the rights to use, copy, merge,
+publish, distribute, and/or sell copies of the Font Software, and to permit
+persons to whom the Font Software is furnished to do so, subject to the
+following conditions:
+
+The above copyright and trademark notices and this permission notice shall
+be included in all copies of one or more of the Font Software typefaces.
+
+The Font Software may be modified, altered, or added to, and in particular
+the designs of glyphs or characters in the Fonts may be modified and
+additional glyphs or characters may be added to the Fonts, only if the fonts
+are renamed to names not containing either the words "Bitstream" or the word
+"Vera".
+
+This License becomes null and void to the extent applicable to Fonts or Font
+Software that has been modified and is distributed under the "Bitstream
+Vera" names.
+
+The Font Software may be sold as part of a larger software package but no
+copy of one or more of the Font Software typefaces may be sold by itself.
+
+THE FONT SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+OR IMPLIED, INCLUDING BUT NOT LIMITED TO ANY WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT OF COPYRIGHT, PATENT,
+TRADEMARK, OR OTHER RIGHT. IN NO EVENT SHALL BITSTREAM OR THE GNOME
+FOUNDATION BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, INCLUDING
+ANY GENERAL, SPECIAL, INDIRECT, INCIDENTAL, OR CONSEQUENTIAL DAMAGES,
+WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF
+THE USE OR INABILITY TO USE THE FONT SOFTWARE OR FROM OTHER DEALINGS IN THE
+FONT SOFTWARE.
+
+Except as contained in this notice, the names of Gnome, the Gnome
+Foundation, and Bitstream Inc., shall not be used in advertising or
+otherwise to promote the sale, use or other dealings in this Font Software
+without prior written authorization from the Gnome Foundation or Bitstream
+Inc., respectively. For further information, contact: fonts at gnome dot
+org. 
+
+Arev Fonts Copyright
+------------------------------
+
+Copyright (c) 2006 by Tavmjong Bah. All Rights Reserved.
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of the fonts accompanying this license ("Fonts") and
+associated documentation files (the "Font Software"), to reproduce
+and distribute the modifications to the Bitstream Vera Font Software,
+including without limitation the rights to use, copy, merge, publish,
+distribute, and/or sell copies of the Font Software, and to permit
+persons to whom the Font Software is furnished to do so, subject to
+the following conditions:
+
+The above copyright and trademark notices and this permission notice
+shall be included in all copies of one or more of the Font Software
+typefaces.
+
+The Font Software may be modified, altered, or added to, and in
+particular the designs of glyphs or characters in the Fonts may be
+modified and additional glyphs or characters may be added to the
+Fonts, only if the fonts are renamed to names not containing either
+the words "Tavmjong Bah" or the word "Arev".
+
+This License becomes null and void to the extent applicable to Fonts
+or Font Software that has been modified and is distributed under the 
+"Tavmjong Bah Arev" names.
+
+The Font Software may be sold as part of a larger software package but
+no copy of one or more of the Font Software typefaces may be sold by
+itself.
+
+THE FONT SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO ANY WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT
+OF COPYRIGHT, PATENT, TRADEMARK, OR OTHER RIGHT. IN NO EVENT SHALL
+TAVMJONG BAH BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+INCLUDING ANY GENERAL, SPECIAL, INDIRECT, INCIDENTAL, OR CONSEQUENTIAL
+DAMAGES, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+FROM, OUT OF THE USE OR INABILITY TO USE THE FONT SOFTWARE OR FROM
+OTHER DEALINGS IN THE FONT SOFTWARE.
+
+Except as contained in this notice, the name of Tavmjong Bah shall not
+be used in advertising or otherwise to promote the sale, use or other
+dealings in this Font Software without prior written authorization
+from Tavmjong Bah. For further information, contact: tavmjong @ free
+. fr.
+
+$Id: LICENSE 2133 2007-11-28 02:46:28Z lechimp $
+-->
+</body>
+</html>
